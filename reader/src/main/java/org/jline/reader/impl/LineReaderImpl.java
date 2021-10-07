@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2020, the original author or authors.
+ * Copyright (c) 2002-2021, the original author or authors.
  *
  * This software is distributable under the BSD license. See the terms of the
  * BSD license in the documentation provided with this software.
@@ -1087,13 +1087,13 @@ public class LineReaderImpl implements LineReader, Flushable
         editor.setRestricted(true);
         editor.open(Collections.singletonList(file.getName()));
         editor.run();
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String line;
-        commandsBuffer.clear();
-        while ((line = br.readLine()) != null) {
-            commandsBuffer.add(line);
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            commandsBuffer.clear();
+            while ((line = br.readLine()) != null) {
+                commandsBuffer.add(line);
+            }
         }
-        br.close();
     }
 
     //
@@ -3595,9 +3595,9 @@ public class LineReaderImpl implements LineReader, Flushable
         File file = null;
         try {
             file = File.createTempFile("jline-execute-", null);
-            FileWriter writer = new FileWriter(file);
-            writer.write(buf.toString());
-            writer.close();
+            try (FileWriter writer = new FileWriter(file)) {
+                writer.write(buf.toString());
+            }
             editAndAddInBuffer(file);
         } catch (Exception e) {
             e.printStackTrace(terminal.writer());
@@ -4521,7 +4521,7 @@ public class LineReaderImpl implements LineReader, Flushable
         }
     }
 
-    private CompletingParsedLine wrap(ParsedLine line) {
+    protected static CompletingParsedLine wrap(ParsedLine line) {
         if (line instanceof CompletingParsedLine) {
             return (CompletingParsedLine) line;
         } else {
